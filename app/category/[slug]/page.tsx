@@ -68,8 +68,11 @@ export default async function CategoryPage({ params }: Props) {
                         <Link href={`/post/${post.slug.current}`}>{post.title}</Link>
                       </h3>
                       <div className="flex items-center gap-3 text-[11px] font-bold text-gray-400 uppercase mb-3">
-                        <span>{new Date(post.publishedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                      </div>
+<span>
+  {post?.publishedAt 
+    ? new Date(post.publishedAt).toLocaleDateString('en-US') 
+    : 'Pending Publication'}
+</span>                      </div>
                       <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 italic">
                         In-depth regulatory and market breakdown of {post.title}. Professional intelligence for the crypto industry.
                       </p>
