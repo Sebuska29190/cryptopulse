@@ -3,14 +3,48 @@ import { urlFor } from "../../../sanity/lib/image";
 import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 import Sidebar from "../../../components/Sidebar";
+import { Metadata } from "next";
 
+// Zapytanie do Sanity
 const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
   title,
   mainImage,
   publishedAt,
   body,
-  "category": categories[0]->title
+  "category": categories[0]->title,
+  "excerpt": array::join(string::split(pt::text(body), "")[0..160], "")
 }`;
+
+// KROK 3: DYNAMICZNE SEO DLA ARTYKUŁU
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const post = await client.fetch(POST_QUERY, { slug: params.slug });
+
+  if (!post) {
+    return { title: "Article Not Found | Crypto Pulse Now" };
+  }
+
+  // Generujemy URL zdjęcia dla Google/Social Media
+  const ogImage = post.mainImage ? urlFor(post.mainImage).width(1200).height(630).url() : "/og-image.jpg";
+
+  return {
+    title: post.title,
+    description: post.excerpt + "...", // Automatyczny skrót z tekstu posta
+    openGraph: {
+      title: post.title,
+      description: post.excerpt + "...",
+      url: `https://www.cryptopulsenow.xyz/post/${params.slug}`,
+      type: "article",
+      publishedTime: post.publishedAt,
+      images: [{ url: ogImage, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt + "...",
+      images: [ogImage],
+    },
+  };
+}
 
 const components = {
   block: {
