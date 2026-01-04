@@ -1,3 +1,4 @@
+export const revalidate = 60; // odświeżaj dane co 60 sekund
 import { client } from "../../../sanity/lib/client";
 import { urlFor } from "../../../sanity/lib/image";
 import { PortableText } from "@portabletext/react";
@@ -17,7 +18,7 @@ const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
 
 // KROK 3: DYNAMICZNE SEO DLA ARTYKUŁU
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = await client.fetch(POST_QUERY, { slug: params.slug });
+const post = await client.fetch(POST_QUERY, { slug: params.slug }, { next: { revalidate: 60 } });
 
   if (!post) {
     return { title: "Article Not Found | Crypto Pulse Now" };
